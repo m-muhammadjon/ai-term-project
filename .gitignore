@@ -53,3 +53,12 @@ Thumbs.db
 htmlcov/
 .pytest_cache/
 
+# AI Models (large files)
+api/my_finbert/
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.h5
+*.ckpt
+
