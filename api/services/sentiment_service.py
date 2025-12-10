@@ -11,13 +11,28 @@ class SentimentService:
     """Service to analyze sentiment of news articles"""
     
     def __init__(self):
-        # Using TextBlob or VADER for sentiment analysis
-        # For production, consider using OpenAI API, Google Cloud NLP, or AWS Comprehend
+        # Priority order:
+        # 1. FinBERT model (local, best for financial text)
+        # 2. OpenAI API (if enabled and key provided)
+        # 3. Simple keyword-based algorithm (fallback)
+        
         self.use_external_api = os.getenv('USE_EXTERNAL_SENTIMENT_API', 'false').lower() == 'true'
+        self.use_finbert = os.getenv('USE_FINBERT', 'true').lower() == 'true'
         
         # OpenAI API for advanced sentiment analysis (optional)
         self.openai_api_key = os.getenv('OPENAI_API_KEY', '')
         self.openai_base_url = 'https://api.openai.com/v1'
+        
+        # Try to load FinBERT model
+        self.finbert_available = False
+        if self.use_finbert:
+            try:
+                from api.ai_model import predict_sentiment as finbert_predict
+                self._finbert_predict = finbert_predict
+                self.finbert_available = True
+            except Exception as e:
+                print(f"FinBERT model not available: {str(e)}")
+                self.finbert_available = False
     
     def analyze_sentiment(self, text: str) -> Dict[str, str]:
         """
@@ -28,13 +43,27 @@ class SentimentService:
             return {'sentiment': 'Neutral'}
         
         try:
+            # Try FinBERT first (best for financial text)
+            if self.finbert_available:
+                sentiment = self._finbert_predict(text)
+                return {'sentiment': sentiment}
+            
+            # Fallback to OpenAI if enabled
             if self.use_external_api and self.openai_api_key:
                 return self._analyze_with_openai(text)
-            else:
-                return self._analyze_with_simple_algorithm(text)
+            
+            # Fallback to simple keyword-based algorithm
+            return self._analyze_with_simple_algorithm(text)
+            
         except Exception as e:
             print(f"Error analyzing sentiment: {str(e)}")
-            return {'sentiment': 'Neutral'}
+            # Try fallback methods
+            try:
+                if self.use_external_api and self.openai_api_key:
+                    return self._analyze_with_openai(text)
+            except:
+                pass
+            return self._analyze_with_simple_algorithm(text)
     
     def _analyze_with_openai(self, text: str) -> Dict[str, str]:
         """Analyze sentiment using OpenAI API"""

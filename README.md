@@ -102,7 +102,25 @@ python manage.py populate_news --time-period 30d --limit 20 --delay 3.0
 python manage.py populate_news --skip-existing
 ```
 
-7. **Run development server:**
+7. **Analyze sentiment for news articles (optional):**
+```bash
+# Analyze sentiment for all unchecked news articles using FinBERT
+python manage.py analyze_sentiments
+
+# Analyze with custom batch size
+python manage.py analyze_sentiments --batch-size 50
+
+# Analyze for a specific ticker
+python manage.py analyze_sentiments --ticker AAPL
+
+# Re-analyze all news articles (force update)
+python manage.py analyze_sentiments --force
+
+# Limit number of articles to process
+python manage.py analyze_sentiments --limit 1000
+```
+
+8. **Run development server:**
 ```bash
 python manage.py runserver
 ```

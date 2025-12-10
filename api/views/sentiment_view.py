@@ -51,7 +51,8 @@ class SentimentView(APIView):
                     }
                 }, status=status.HTTP_200_OK)
             
-            # Analyze sentiment
+            # Analyze sentiment using FinBERT model (via SentimentService)
+            # SentimentService uses FinBERT by default, with fallback to OpenAI or keyword-based
             sentiment_service = SentimentService()
             text_to_analyze = f"{news.title} {news.content}"
             sentiment_result = sentiment_service.analyze_sentiment(text_to_analyze)

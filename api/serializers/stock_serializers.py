@@ -46,10 +46,12 @@ class NewsSerializer(serializers.ModelSerializer):
     author = serializers.CharField(allow_null=True)
     date = serializers.DateTimeField()
     link = serializers.URLField()
+    sentiment = serializers.CharField(allow_null=True, required=False)
+    sentimentAnalyzed = serializers.BooleanField(source='sentiment_analyzed', required=False)
     
     class Meta:
         model = News
-        fields = ['id', 'ticker', 'title', 'content', 'source', 'author', 'date', 'link']
+        fields = ['id', 'ticker', 'title', 'content', 'source', 'author', 'date', 'link', 'sentiment', 'sentimentAnalyzed']
 
 
 class SentimentResponseSerializer(serializers.Serializer):
