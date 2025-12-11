@@ -1,7 +1,3 @@
-"""
-Management command to populate initial stock data
-Usage: python manage.py populate_stocks
-"""
 import time
 from django.core.management.base import BaseCommand
 from api.models import Stock

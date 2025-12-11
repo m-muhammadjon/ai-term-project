@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-q(z!yn(pt-uf$1hpu+&!ygb)uvmwk2e5h#5v(2b1-%hv%=+cw4
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -152,7 +152,6 @@ CORS_ALLOW_CREDENTIALS = True
 # ALPHA_VANTAGE_API_KEY - for stock market data
 # TWITTER_BEARER_TOKEN - for Twitter API
 # NEWS_API_KEY - for NewsAPI
-# OPENAI_API_KEY - for advanced sentiment analysis (optional)
 
 # drf-spectacular settings for API documentation
 SPECTACULAR_SETTINGS = {

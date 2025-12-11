@@ -7,7 +7,6 @@ from api.serializers.stock_serializers import StockSerializer
 
 
 class StocksView(APIView):
-    """API endpoint to get all stocks"""
     
     @extend_schema(
         summary="Get all stocks",
@@ -30,7 +29,5 @@ class StocksView(APIView):
         stocks = Stock.objects.all()[:limit]
         serializer = StockSerializer(stocks, many=True)
         
-        return Response({
-            'data': serializer.data
-        }, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 

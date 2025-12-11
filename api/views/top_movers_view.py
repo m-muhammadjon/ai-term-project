@@ -7,7 +7,6 @@ from api.serializers.stock_serializers import TopMoverSerializer
 
 
 class TopMoversView(APIView):
-    """API endpoint to get top movers"""
     
     @extend_schema(
         summary="Get top movers",
@@ -31,7 +30,5 @@ class TopMoversView(APIView):
         movers = stock_service.get_top_movers(limit=limit)
         
         serializer = TopMoverSerializer(movers, many=True)
-        return Response({
-            'data': serializer.data
-        }, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 

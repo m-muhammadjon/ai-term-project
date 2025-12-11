@@ -1,7 +1,3 @@
-"""
-Management command to analyze sentiment for all unchecked news articles
-Usage: python manage.py analyze_sentiments
-"""
 import time
 from django.core.management.base import BaseCommand
 from django.db.models import Q, Count
@@ -50,7 +46,6 @@ class Command(BaseCommand):
         
         self.stdout.write('Starting sentiment analysis for news articles...')
         
-        # Initialize sentiment service (will use FinBERT by default)
         sentiment_service = SentimentService()
         
         if sentiment_service.finbert_available:
@@ -58,7 +53,6 @@ class Command(BaseCommand):
         else:
             self.stdout.write(self.style.WARNING('⚠ FinBERT not available, using fallback method'))
         
-        # Build query for unchecked news
         if force:
             query = Q()
             self.stdout.write('Mode: Re-analyzing all news articles')
@@ -70,7 +64,6 @@ class Command(BaseCommand):
             query &= Q(ticker=specific_ticker.upper())
             self.stdout.write(f'Filtering by ticker: {specific_ticker.upper()}')
         
-        # Get news articles to process
         news_queryset = News.objects.filter(query).order_by('-date')
         
         if limit:
@@ -90,7 +83,6 @@ class Command(BaseCommand):
         error_count = 0
         updated_count = 0
         
-        # Process in batches
         for i in range(0, total_count, batch_size):
             batch = news_queryset[i:i + batch_size]
             batch_num = (i // batch_size) + 1
@@ -105,11 +97,9 @@ class Command(BaseCommand):
                 try:
                     processed_count += 1
                     
-                    # Skip if already analyzed and not forcing
                     if not force and news.sentiment_analyzed and news.sentiment:
                         continue
                     
-                    # Prepare text for analysis
                     text_to_analyze = f"{news.title} {news.content}".strip()
                     
                     if not text_to_analyze:
@@ -121,14 +111,11 @@ class Command(BaseCommand):
                         )
                         continue
                     
-                    # Analyze sentiment
                     sentiment_result = sentiment_service.analyze_sentiment(text_to_analyze)
                     sentiment = sentiment_result.get('sentiment', 'Neutral')
                     
-                    # Check if sentiment changed
                     sentiment_changed = news.sentiment != sentiment
                     
-                    # Update news article
                     news.sentiment = sentiment
                     news.sentiment_analyzed = True
                     news.save(update_fields=['sentiment', 'sentiment_analyzed'])
@@ -137,7 +124,6 @@ class Command(BaseCommand):
                     if sentiment_changed or not news.sentiment_analyzed:
                         updated_count += 1
                     
-                    # Progress indicator
                     if processed_count % 10 == 0 or processed_count == total_count:
                         self.stdout.write(
                             f'  Progress: {processed_count}/{total_count} '
@@ -146,7 +132,6 @@ class Command(BaseCommand):
                         )
                         self.stdout.flush()
                     
-                    # Small delay to avoid overwhelming the system
                     if delay > 0:
                         time.sleep(delay)
                     
@@ -160,7 +145,6 @@ class Command(BaseCommand):
                         )
                     )
             
-            # Summary after each batch
             self.stdout.write('')
             self.stdout.write(
                 f'  Batch {batch_num} complete: '
@@ -168,7 +152,6 @@ class Command(BaseCommand):
             )
             self.stdout.write('')
         
-        # Final summary
         self.stdout.write('')
         self.stdout.write(self.style.SUCCESS('=' * 60))
         self.stdout.write(self.style.SUCCESS('Analysis Complete!'))
@@ -178,7 +161,6 @@ class Command(BaseCommand):
         self.stdout.write(f'  Errors: {error_count}')
         self.stdout.write(self.style.SUCCESS('=' * 60))
         
-        # Statistics by sentiment
         if success_count > 0:
             self.stdout.write('')
             self.stdout.write('Sentiment distribution:')

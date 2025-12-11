@@ -1,7 +1,3 @@
-"""
-Management command to fetch news for all stocks
-Usage: python manage.py populate_news
-"""
 import time
 from django.core.management.base import BaseCommand
 from django.utils import timezone

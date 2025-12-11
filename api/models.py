@@ -4,7 +4,6 @@ from django.utils import timezone
 
 
 class Stock(models.Model):
-    """Model to store stock information"""
     ticker = models.CharField(max_length=10, unique=True, db_index=True)
     company_full_name = models.CharField(max_length=255)
     current_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
@@ -23,7 +22,6 @@ class Stock(models.Model):
 
 
 class News(models.Model):
-    """Model to store news articles"""
     SENTIMENT_CHOICES = [
         ('Bullish', 'Bullish'),
         ('Bearish', 'Bearish'),
@@ -54,7 +52,6 @@ class News(models.Model):
 
 
 class PriceHistory(models.Model):
-    """Model to store historical price data for stocks"""
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE, related_name='price_history')
     date = models.DateField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -72,7 +69,6 @@ class PriceHistory(models.Model):
 
 
 class NewsSentimentHistory(models.Model):
-    """Model to store sentiment history for stocks"""
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE, related_name='sentiment_history')
     date = models.DateField()
     bullish_count = models.IntegerField(default=0)

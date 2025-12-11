@@ -9,7 +9,6 @@ from api.services.news_service import NewsService
 
 
 class NewsView(APIView):
-    """API endpoint to get news articles"""
     
     @extend_schema(
         summary="Get news articles",
@@ -56,12 +55,10 @@ class NewsView(APIView):
         stocks = request.query_params.get('stocks', None)
         time_period = request.query_params.get('timePeriod', '7d')
         
-        # Parse stocks filter (comma-separated)
         ticker_list = None
         if stocks:
             ticker_list = [t.strip().upper() for t in stocks.split(',')]
         
-        # Calculate date range based on time_period
         if time_period == '1d':
             start_date = datetime.now() - timedelta(days=1)
         elif time_period == '7d':
@@ -71,7 +68,6 @@ class NewsView(APIView):
         else:
             start_date = datetime.now() - timedelta(days=7)
         
-        # Query news from database
         news_queryset = News.objects.filter(date__gte=start_date)
         
         if ticker_list:
@@ -82,10 +78,9 @@ class NewsView(APIView):
         
         news_count = news_queryset.count()
         
-        # If not enough news in database, fetch from external APIs
         if news_count < limit and ticker_list:
             news_service = NewsService()
-            for ticker in ticker_list[:3]:  # Limit to avoid too many API calls
+            for ticker in ticker_list[:3]:
                 external_news = news_service.get_news_for_ticker(
                     ticker, 
                     limit=limit // len(ticker_list) if ticker_list else limit,
@@ -93,7 +88,6 @@ class NewsView(APIView):
                     time_period=time_period
                 )
                 
-                # Save external news to database
                 for article in external_news:
                     News.objects.update_or_create(
                         link=article['link'],
@@ -109,7 +103,6 @@ class NewsView(APIView):
                         }
                     )
         
-        # Re-query to include newly saved news
         news_queryset = News.objects.filter(date__gte=start_date)
         if ticker_list:
             news_queryset = news_queryset.filter(ticker__in=ticker_list)
@@ -118,7 +111,5 @@ class NewsView(APIView):
         news_queryset = news_queryset.order_by('-date')[:limit]
         
         serializer = NewsSerializer(news_queryset, many=True)
-        return Response({
-            'data': serializer.data
-        }, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 

@@ -9,7 +9,6 @@ import uuid
 
 
 class SentimentView(APIView):
-    """API endpoint to get sentiment analysis for a specific news article"""
     
     @extend_schema(
         summary="Get sentiment analysis",
@@ -31,10 +30,8 @@ class SentimentView(APIView):
     )
     def get(self, request, id):
         try:
-            # Validate UUID
             news_id = uuid.UUID(str(id))
             
-            # Get news article
             try:
                 news = News.objects.get(id=news_id)
             except News.DoesNotExist:
@@ -43,7 +40,6 @@ class SentimentView(APIView):
                     status=status.HTTP_404_NOT_FOUND
                 )
             
-            # If sentiment already analyzed, return it
             if news.sentiment_analyzed and news.sentiment:
                 return Response({
                     'data': {
@@ -51,13 +47,10 @@ class SentimentView(APIView):
                     }
                 }, status=status.HTTP_200_OK)
             
-            # Analyze sentiment using FinBERT model (via SentimentService)
-            # SentimentService uses FinBERT by default, with fallback to OpenAI or keyword-based
             sentiment_service = SentimentService()
             text_to_analyze = f"{news.title} {news.content}"
             sentiment_result = sentiment_service.analyze_sentiment(text_to_analyze)
             
-            # Update news article with sentiment
             news.sentiment = sentiment_result['sentiment']
             news.sentiment_analyzed = True
             news.save()
